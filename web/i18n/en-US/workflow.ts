@@ -70,6 +70,7 @@ const translation = {
     pasteHere: 'Paste Here',
     pointerMode: 'Pointer Mode',
     handMode: 'Hand Mode',
+    exportAsSVG: 'Export as SVG',
     model: 'Model',
     workflowAsTool: 'Workflow as Tool',
     configureRequired: 'Configure Required',

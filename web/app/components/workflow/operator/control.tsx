@@ -5,6 +5,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import {
   RiCursorLine,
+  RiExportLine,
   RiFunctionAddLine,
   RiHand,
   RiStickyNoteAddLine,
@@ -41,6 +42,30 @@ const Control = () => {
 
     e.stopPropagation()
     handleAddNote()
+  }
+
+  const exportAsSVG = () => {
+    // const nodesBounds = getNodesBounds(nodesReadOnly);
+    //   const viewport = getViewportForBounds(
+    //     nodesBounds,
+    //     imageWidth,
+    //     imageHeight,
+    //     0.5,
+    //     2,
+    //   );
+
+    //   toPng(document.querySelector('.react-flow__viewport'), {
+    //     backgroundColor: '#1a365d',
+    //     width: imageWidth,
+    //     height: imageHeight,
+    //     style: {
+    //       width: imageWidth,
+    //       height: imageHeight,
+    //       transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
+    //     },
+    //   }).then(downloadImage);
+    // };
+
   }
 
   return (
@@ -80,6 +105,17 @@ const Control = () => {
           onClick={handleModeHand}
         >
           <RiHand className='h-4 w-4' />
+        </div>
+      </TipPopup>
+      <TipPopup title={t('workflow.common.exportAsSVG')} shortcuts={['ctrl', 's']}>
+        <div
+          className={cn(
+            'ml-[1px] flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg hover:bg-state-base-hover hover:text-text-secondary',
+            `${nodesReadOnly && 'cursor-not-allowed text-text-disabled hover:bg-transparent hover:text-text-disabled'}`,
+          )}
+          onClick={exportAsSVG}
+        >
+          <RiExportLine className='h-4 w-4' />
         </div>
       </TipPopup>
       <Divider type='vertical' className='mx-0.5 h-3.5' />
