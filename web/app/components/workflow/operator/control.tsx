@@ -1,6 +1,7 @@
 import type { MouseEvent } from 'react'
 import {
   memo,
+  useMemo,
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -24,6 +25,9 @@ import AddBlock from './add-block'
 import TipPopup from './tip-popup'
 import { useOperator } from './hooks'
 import cn from '@/utils/classnames'
+import { getNodesBounds, getViewportForBounds, useReactFlow } from 'reactflow'
+import { toPng } from 'html-to-image'
+import { useStore as useAppStore } from '@/app/components/app/store'
 
 const Control = () => {
   const { t } = useTranslation()
@@ -35,6 +39,8 @@ const Control = () => {
     nodesReadOnly,
     getNodesReadOnly,
   } = useNodesReadOnly()
+  const { getNodes } = useReactFlow()
+  const appDetail = useAppStore(state => state.appDetail)
 
   const addNote = (e: MouseEvent<HTMLDivElement>) => {
     if (getNodesReadOnly())
@@ -44,28 +50,39 @@ const Control = () => {
     handleAddNote()
   }
 
+  const downloadImage = useMemo(() => {
+    return (dataUrl: string) => {
+      const a = document.createElement('a')
+      a.setAttribute('download', `${appDetail?.name}.png`)
+      a.setAttribute('href', dataUrl)
+      a.click()
+    }
+  }, [appDetail])
+
   const exportAsSVG = () => {
-    // const nodesBounds = getNodesBounds(nodesReadOnly);
-    //   const viewport = getViewportForBounds(
-    //     nodesBounds,
-    //     imageWidth,
-    //     imageHeight,
-    //     0.5,
-    //     2,
-    //   );
+    const nodesBounds = getNodesBounds(getNodes())
+    const imageWidth = 1024
+    const imageHeight = 768
+    const viewport = getViewportForBounds(
+      nodesBounds,
+      imageWidth,
+      imageHeight,
+      0.5,
+      2,
+    )
 
-    //   toPng(document.querySelector('.react-flow__viewport'), {
-    //     backgroundColor: '#1a365d',
-    //     width: imageWidth,
-    //     height: imageHeight,
-    //     style: {
-    //       width: imageWidth,
-    //       height: imageHeight,
-    //       transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
-    //     },
-    //   }).then(downloadImage);
-    // };
-
+    toPng(document.querySelector('.react-flow__viewport') as HTMLElement, {
+      backgroundColor: '#f2f4f7',
+      width: imageWidth,
+      height: imageHeight,
+      style: {
+        width: imageWidth.toString(),
+        height: imageHeight.toString(),
+        transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
+      },
+    }).then((dataUrl) => {
+      downloadImage(dataUrl)
+    })
   }
 
   return (
@@ -107,7 +124,7 @@ const Control = () => {
           <RiHand className='h-4 w-4' />
         </div>
       </TipPopup>
-      <TipPopup title={t('workflow.common.exportAsSVG')} shortcuts={['ctrl', 's']}>
+      <TipPopup title={t('workflow.common.exportAsSVG')}>
         <div
           className={cn(
             'ml-[1px] flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg hover:bg-state-base-hover hover:text-text-secondary',
