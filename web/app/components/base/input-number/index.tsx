@@ -2,6 +2,7 @@ import type { FC } from 'react'
 import { RiArrowDownSLine, RiArrowUpSLine } from '@remixicon/react'
 import Input, { type InputProps } from '../input'
 import classNames from '@/utils/classnames'
+import { useState } from 'react'
 
 export type InputNumberProps = {
   unit?: string
@@ -20,6 +21,7 @@ export type InputNumberProps = {
 
 export const InputNumber: FC<InputNumberProps> = (props) => {
   const { unit, className, onChange, amount = 1, value, size = 'regular', max, min, defaultValue, wrapClassName, controlWrapClassName, controlClassName, disabled, ...rest } = props
+  const [error, setError] = useState<string>('')
 
   const isValidValue = (v: number) => {
     if (typeof max === 'number' && v > max)
@@ -52,63 +54,76 @@ export const InputNumber: FC<InputNumberProps> = (props) => {
     onChange(newValue)
   }
 
-  return <div className={classNames('flex', wrapClassName)}>
-    <Input {...rest}
-      // disable default controller
-      type='text'
-      className={classNames('rounded-r-none', className)}
-      value={value}
-      max={max}
-      min={min}
-      disabled={disabled}
-      onChange={(e) => {
-        if (e.target.value === '')
-          onChange(undefined)
-
-        const parsed = Number(e.target.value)
-        if (Number.isNaN(parsed))
-          return
-
-        if (!isValidValue(parsed))
-          return
-        onChange(parsed)
-      }}
-      unit={unit}
-      size={size}
-    />
-    <div className={classNames(
-      'flex flex-col bg-components-input-bg-normal rounded-r-md border-l border-divider-subtle text-text-tertiary focus:shadow-xs',
-      disabled && 'opacity-50 cursor-not-allowed',
-      controlWrapClassName)}
-    >
-      <button
-        type='button'
-        onClick={inc}
+  return <div className={classNames('flex flex-col', wrapClassName)}>
+    <div className='flex'>
+      <Input {...rest}
+        // disable default controller
+        type='text'
+        className={classNames('rounded-r-none', className, error && 'border-red-500')}
+        value={value}
+        max={max}
+        min={min}
         disabled={disabled}
-        aria-label='increment'
-        className={classNames(
-          size === 'regular' ? 'pt-1' : 'pt-1.5',
-          'px-1.5 hover:bg-components-input-bg-hover',
-          disabled && 'cursor-not-allowed hover:bg-transparent',
-          controlClassName,
-        )}
+        onChange={(e) => {
+          if (e.target.value === '') {
+            setError('')
+            onChange(undefined)
+            return
+          }
+
+          const parsed = Number(e.target.value)
+          if (Number.isNaN(parsed)) {
+            setError('请输入有效的数字')
+            return
+          }
+
+          if (!isValidValue(parsed)) {
+            setError('请输入有效的数字')
+            return
+          }
+          setError('')
+          onChange(parsed)
+        }}
+        unit={unit}
+        size={size}
+      />
+      <div className={classNames(
+        'flex flex-col bg-components-input-bg-normal rounded-r-md border-l border-divider-subtle text-text-tertiary focus:shadow-xs',
+        disabled && 'opacity-50 cursor-not-allowed',
+        controlWrapClassName)}
       >
-        <RiArrowUpSLine className='size-3' />
-      </button>
-      <button
-        type='button'
-        onClick={dec}
-        disabled={disabled}
-        aria-label='decrement'
-        className={classNames(
-          size === 'regular' ? 'pb-1' : 'pb-1.5',
-          'px-1.5 hover:bg-components-input-bg-hover',
-          disabled && 'cursor-not-allowed hover:bg-transparent',
-          controlClassName,
-        )}
-      >
-        <RiArrowDownSLine className='size-3' />
-      </button>
+        <button
+          type='button'
+          onClick={inc}
+          disabled={disabled}
+          aria-label='increment'
+          className={classNames(
+            size === 'regular' ? 'pt-1' : 'pt-1.5',
+            'px-1.5 hover:bg-components-input-bg-hover',
+            disabled && 'cursor-not-allowed hover:bg-transparent',
+            controlClassName,
+          )}
+        >
+          <RiArrowUpSLine className='size-3' />
+        </button>
+        <button
+          type='button'
+          onClick={dec}
+          disabled={disabled}
+          aria-label='decrement'
+          className={classNames(
+            size === 'regular' ? 'pb-1' : 'pb-1.5',
+            'px-1.5 hover:bg-components-input-bg-hover',
+            disabled && 'cursor-not-allowed hover:bg-transparent',
+            controlClassName,
+          )}
+        >
+          <RiArrowDownSLine className='size-3' />
+        </button>
+      </div>
     </div>
+    {error && (
+      <div className='mt-1 text-xs text-red-500'>{error}</div>
+    )}
   </div>
 }
